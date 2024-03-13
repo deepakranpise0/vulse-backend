@@ -1,0 +1,73 @@
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://vulse:vulse%400613@localhost:3306/vulse"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  email         String   @unique
+  password      String 
+  role          ROLE  
+  userjourney   UserJourney[]
+  userResponse  UserResponse[]
+
+}
+
+enum ROLE {
+  ADMIN
+  USER
+}
+
+model UserJourney {
+  id            Int       @id @default(autoincrement())
+  timestamp     DateTime  @default(now())
+  method        String
+  url           String
+  user          User      @relation(fields: [userId], references: [id]) // Define relationship with User model
+  userId        Int   
+  request_body  String?   @db.Text
+  status_code   Int
+  response_body String?   @db.Text
+}
+
+// question.model.prisma
+model Question {
+  id            Int     @id @default(autoincrement())
+  text          String
+  options       Json    
+  correctOption Int    
+  quiz          Quiz    @relation(fields: [quizId], references: [id])
+  quizId        Int
+}
+
+// quiz.model.prisma
+model Quiz {
+  id            Int       @id @default(autoincrement())
+  title         String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  questions     Question[]
+  userResponse  UserResponse[]
+}
+
+model UserResponse {
+  id              Int   @id @default(autoincrement())
+  user            User  @relation(fields: [userId], references: [id]) // Define relationship with User model
+  userId          Int       
+  quiz            Quiz  @relation(fields: [quizId], references: [id]) // Define relationship with User model
+  quizId          Int   
+  responses       Json
+  score           Int   @default(0)
+}
+
+
+
